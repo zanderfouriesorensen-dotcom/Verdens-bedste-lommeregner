@@ -1,0 +1,309 @@
+
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ULTIMATE CALCULATOR</title>
+<style>
+:root {
+  --bg:#0b0e16;
+  --panel:#151b2b;
+  --panel2:#222b40;
+  --text:#ffffff;
+  --muted:#929bb2;
+  --accent:#8275ff;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+}
+header {
+  padding:22px;
+  border-bottom:1px solid #30394e;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.logo {
+  font-size:24px;
+  font-weight:900;
+}
+.logo span {color:var(--accent)}
+.layout {
+  max-width:1300px;
+  margin:auto;
+  padding:25px;
+  display:grid;
+  grid-template-columns:210px 1fr;
+  gap:20px;
+}
+.sidebar,.card {
+  background:var(--panel);
+  padding:18px;
+  border-radius:16px;
+}
+.nav {
+  display:block;
+  width:100%;
+  text-align:left;
+  padding:13px;
+  margin:4px 0;
+  border:0;
+  border-radius:9px;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+}
+.nav.active,.nav:hover {
+  background:var(--panel2);
+  color:white;
+}
+.page {display:none}
+.page.active {display:block}
+.display {
+  background:var(--panel2);
+  border-radius:12px;
+  padding:20px;
+  text-align:right;
+  margin:15px 0;
+}
+.expression {color:var(--muted)}
+.result {font-size:40px;margin-top:10px}
+.keys {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+.key {
+  padding:17px;
+  border:0;
+  border-radius:10px;
+  background:var(--panel2);
+  color:white;
+  font-size:18px;
+  cursor:pointer;
+}
+.key:hover {filter:brightness(1.3)}
+.op {color:#aaa0ff}
+.equal {background:var(--accent)}
+input,select,textarea {
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:9px;
+  border:1px solid #30394e;
+  background:var(--panel2);
+  color:white;
+}
+.primary {
+  background:var(--accent);
+  color:white;
+  padding:12px 20px;
+  border:0;
+  border-radius:9px;
+  cursor:pointer;
+}
+.output {
+  background:var(--panel2);
+  padding:15px;
+  margin-top:15px;
+  border-radius:10px;
+  overflow-wrap:anywhere;
+}
+.history-item {
+  padding:12px;
+  background:var(--panel2);
+  border-radius:9px;
+  margin:8px 0;
+  cursor:pointer;
+}
+@media(max-width:750px) {
+  .layout {grid-template-columns:1fr;padding:12px}
+  .sidebar {display:flex;overflow-x:auto;gap:5px}
+  .nav {white-space:nowrap;width:auto}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">ULTIMATE<span>.</span></div>
+  <button onclick="document.body.classList.toggle('light')">◐</button>
+</header>
+
+<div class="layout">
+<aside class="sidebar">
+  <button class="nav active" data-page="calculator">⌗ Lommeregner</button>
+  <button class="nav" data-page="scientific">∑ Videnskabelig</button>
+  <button class="nav" data-page="fractions">½ Brøker</button>
+  <button class="nav" data-page="geometry">△ Geometri</button>
+  <button class="nav" data-page="statistics">▥ Statistik</button>
+  <button class="nav" data-page="finance">◈ Finans</button>
+  <button class="nav" data-page="converter">⇄ Omregner</button>
+  <button class="nav" data-page="programmer">⌘ Programmer</button>
+  <button class="nav" data-page="equations">x Ligninger</button>
+</aside>
+
+<main>
+<section class="page active" id="calculator">
+<h1>Lommeregner</h1>
+<div class="card">
+<div class="display">
+<div class="expression" id="expression">Klar</div>
+<div class="result" id="result">0</div>
+</div>
+<div class="keys">
+<button class="key" onclick="clearCalc()">AC</button>
+<button class="key" onclick="insert('(')">(</button>
+<button class="key" onclick="insert(')')">)</button>
+<button class="key op" onclick="insert('/')">÷</button>
+<button class="key" onclick="insert('7')">7</button>
+<button class="key" onclick="insert('8')">8</button>
+<button class="key" onclick="insert('9')">9</button>
+<button class="key op" onclick="insert('*')">×</button>
+<button class="key" onclick="insert('4')">4</button>
+<button class="key" onclick="insert('5')">5</button>
+<button class="key" onclick="insert('6')">6</button>
+<button class="key op" onclick="insert('-')">−</button>
+<button class="key" onclick="insert('1')">1</button>
+<button class="key" onclick="insert('2')">2</button>
+<button class="key" onclick="insert('3')">3</button>
+<button class="key op" onclick="insert('+')">+</button>
+<button class="key" onclick="insert('0')">0</button>
+<button class="key" onclick="insert('.')">.</button>
+<button class="key" onclick="backspace()">⌫</button>
+<button class="key equal" onclick="calculate()">=</button>
+</div>
+</div>
+<div class="card">
+<h3>Historik</h3>
+<div id="history"></div>
+</div>
+</section>
+
+<section class="page" id="scientific">
+<h1>Videnskabelig beregner</h1>
+<div class="card">
+<input id="sciInput" placeholder="Eksempel: sqrt(25) + sin(30)">
+<select id="angleMode">
+<option value="deg">Grader</option>
+<option value="rad">Radianer</option>
+</select>
+<button class="primary" onclick="scientificCalc()">Beregn</button>
+<div class="output" id="sciOutput"></div>
+</div>
+</section>
+
+<section class="page" id="fractions">
+<h1>Brøkberegner</h1>
+<div class="card">
+<label>Tæller 1</label><input id="fa" type="number" value="1">
+<label>Nævner 1</label><input id="fb" type="number" value="2">
+<label>Tæller 2</label><input id="fc" type="number" value="1">
+<label>Nævner 2</label><input id="fd" type="number" value="3">
+<select id="fop">
+<option value="+">Addition</option>
+<option value="-">Subtraktion</option>
+<option value="*">Multiplikation</option>
+<option value="/">Division</option>
+</select>
+<button class="primary" onclick="fractionCalc()">Beregn</button>
+<div class="output" id="fractionOutput"></div>
+</div>
+</section>
+
+<section class="page" id="geometry">
+<h1>Geometri</h1>
+<div class="card">
+<select id="shape" onchange="geometryFields()">
+<option value="circle">Cirkel</option>
+<option value="rectangle">Rektangel</option>
+<option value="triangle">Trekant</option>
+<option value="square">Kvadrat</option>
+<option value="sphere">Kugle</option>
+<option value="cube">Terning</option>
+<option value="cylinder">Cylinder</option>
+<option value="cone">Kegle</option>
+</select>
+<div id="geometryInputs"></div>
+<button class="primary" onclick="geometryCalc()">Beregn</button>
+<div class="output" id="geometryOutput"></div>
+</div>
+</section>
+
+<section class="page" id="statistics">
+<h1>Statistik</h1>
+<div class="card">
+<textarea id="statInput" placeholder="Indtast tal: 10, 20, 30"></textarea>
+<button class="primary" onclick="statisticsCalc()">Analyser</button>
+<div class="output" id="statOutput"></div>
+</div>
+</section>
+
+<section class="page" id="finance">
+<h1>Finans</h1>
+<div class="card">
+<select id="finType" onchange="financeFields()">
+<option value="compound">Renters rente</option>
+<option value="loan">Lån</option>
+<option value="vat">Moms</option>
+<option value="discount">Rabat</option>
+</select>
+<div id="financeInputs"></div>
+<button class="primary" onclick="financeCalc()">Beregn</button>
+<div class="output" id="financeOutput"></div>
+</div>
+</section>
+
+<section class="page" id="converter">
+<h1>Enhedsomregner</h1>
+<div class="card">
+<select id="convType" onchange="converterUnits()">
+<option value="length">Længde</option>
+<option value="weight">Vægt</option>
+<option value="temp">Temperatur</option>
+<option value="time">Tid</option>
+<option value="volume">Rumfang</option>
+</select>
+<input id="convValue" type="number" value="1">
+<select id="convFrom"></select>
+<select id="convTo"></select>
+<button class="primary" onclick="convert()">Konverter</button>
+<div class="output" id="convOutput"></div>
+</div>
+</section>
+
+<section class="page" id="programmer">
+<h1>Programmerberegner</h1>
+<div class="card">
+<input id="progInput" value="255">
+<select id="progBase">
+<option value="10">Decimal</option>
+<option value="2">Binær</option>
+<option value="8">Oktal</option>
+<option value="16">Hexadecimal</option>
+</select>
+<button class="primary" onclick="programmerCalc()">Konverter</button>
+<div class="output" id="progOutput"></div>
+</div>
+</section>
+
+<section class="page" id="equations">
+<h1>Ligningsløser</h1>
+<div class="card">
+<h3>ax + b = c</h3>
+<input id="la" type="number" value="2">
+<input id="lb" type="number" value="4">
+<input id="lc" type="number" value="10">
+<button class="primary" onclick="linearEquation()">Løs</button>
+<div class="output" id="linearOutput"></div>
+</div>
+</section>
+</main>
+</div>
+<footer>ULTIMATE CALCULATOR</footer>
+</body>
+</html>
