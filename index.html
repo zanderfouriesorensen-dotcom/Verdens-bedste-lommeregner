@@ -4,34 +4,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ULTIMATE CALCULATOR</title>
+<title>Verdens bedste lommeregner</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/13.2.0/math.min.js"></script>
+
 <style>
 :root {
   --bg:#0b0e16;
   --panel:#151b2b;
   --panel2:#222b40;
-  --text:#ffffff;
+  --text:#fff;
   --muted:#929bb2;
   --accent:#8275ff;
 }
-* { box-sizing:border-box; }
+* {box-sizing:border-box}
 body {
   margin:0;
   background:var(--bg);
   color:var(--text);
   font-family:Arial,sans-serif;
 }
+body.light {
+  --bg:#f1f3fa;
+  --panel:#fff;
+  --panel2:#e5e8f2;
+  --text:#171a27;
+  --muted:#626a7c;
+}
 header {
   padding:22px;
-  border-bottom:1px solid #30394e;
+  border-bottom:1px solid #454b60;
   display:flex;
   justify-content:space-between;
   align-items:center;
 }
-.logo {
-  font-size:24px;
-  font-weight:900;
-}
+.logo {font-size:24px;font-weight:900}
 .logo span {color:var(--accent)}
 .layout {
   max-width:1300px;
@@ -60,7 +67,7 @@ header {
 }
 .nav.active,.nav:hover {
   background:var(--panel2);
-  color:white;
+  color:var(--text);
 }
 .page {display:none}
 .page.active {display:block}
@@ -70,6 +77,7 @@ header {
   padding:20px;
   text-align:right;
   margin:15px 0;
+  overflow-wrap:anywhere;
 }
 .expression {color:var(--muted)}
 .result {font-size:40px;margin-top:10px}
@@ -79,25 +87,25 @@ header {
   gap:8px;
 }
 .key {
-  padding:17px;
+  padding:17px 8px;
   border:0;
   border-radius:10px;
   background:var(--panel2);
-  color:white;
+  color:var(--text);
   font-size:18px;
   cursor:pointer;
 }
 .key:hover {filter:brightness(1.3)}
 .op {color:#aaa0ff}
-.equal {background:var(--accent)}
+.equal {background:var(--accent);color:white}
 input,select,textarea {
   width:100%;
   padding:12px;
   margin:8px 0;
   border-radius:9px;
-  border:1px solid #30394e;
+  border:1px solid #454b60;
   background:var(--panel2);
-  color:white;
+  color:var(--text);
 }
 .primary {
   background:var(--accent);
@@ -106,12 +114,15 @@ input,select,textarea {
   border:0;
   border-radius:9px;
   cursor:pointer;
+  font-size:15px;
 }
+.primary:hover {filter:brightness(1.15)}
 .output {
   background:var(--panel2);
   padding:15px;
   margin-top:15px;
   border-radius:10px;
+  white-space:pre-line;
   overflow-wrap:anywhere;
 }
 .history-item {
@@ -120,21 +131,34 @@ input,select,textarea {
   border-radius:9px;
   margin:8px 0;
   cursor:pointer;
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
 }
+footer {
+  text-align:center;
+  padding:30px;
+  color:var(--muted);
+}
+button {font-family:inherit}
 @media(max-width:750px) {
   .layout {grid-template-columns:1fr;padding:12px}
   .sidebar {display:flex;overflow-x:auto;gap:5px}
   .nav {white-space:nowrap;width:auto}
+  .result {font-size:32px}
 }
 </style>
 </head>
+
 <body>
+
 <header>
   <div class="logo">ULTIMATE<span>.</span></div>
-  <button onclick="document.body.classList.toggle('light')">◐</button>
+  <button class="primary" onclick="document.body.classList.toggle('light')">◐ Tema</button>
 </header>
 
 <div class="layout">
+
 <aside class="sidebar">
   <button class="nav active" data-page="calculator">⌗ Lommeregner</button>
   <button class="nav" data-page="scientific">∑ Videnskabelig</button>
@@ -148,184 +172,208 @@ input,select,textarea {
 </aside>
 
 <main>
+
 <section class="page active" id="calculator">
 <h1>Lommeregner</h1>
 <div class="card">
-<div class="display">
-<div class="expression" id="expression">Klar</div>
-<div class="result" id="result">0</div>
+  <div class="display">
+    <div class="expression" id="expression">Klar</div>
+    <div class="result" id="result">0</div>
+  </div>
+  <div class="keys">
+    <button class="key" onclick="clearCalc()">AC</button>
+    <button class="key" onclick="insert('(')">(</button>
+    <button class="key" onclick="insert(')')">)</button>
+    <button class="key op" onclick="insert('/')">÷</button>
+    <button class="key" onclick="insert('7')">7</button>
+    <button class="key" onclick="insert('8')">8</button>
+    <button class="key" onclick="insert('9')">9</button>
+    <button class="key op" onclick="insert('*')">×</button>
+    <button class="key" onclick="insert('4')">4</button>
+    <button class="key" onclick="insert('5')">5</button>
+    <button class="key" onclick="insert('6')">6</button>
+    <button class="key op" onclick="insert('-')">−</button>
+    <button class="key" onclick="insert('1')">1</button>
+    <button class="key" onclick="insert('2')">2</button>
+    <button class="key" onclick="insert('3')">3</button>
+    <button class="key op" onclick="insert('+')">+</button>
+    <button class="key" onclick="insert('0')">0</button>
+    <button class="key" onclick="insert('.')">.</button>
+    <button class="key" onclick="backspace()">⌫</button>
+    <button class="key equal" onclick="calculate()">=</button>
+  </div>
 </div>
-<div class="keys">
-<button class="key" onclick="clearCalc()">AC</button>
-<button class="key" onclick="insert('(')">(</button>
-<button class="key" onclick="insert(')')">)</button>
-<button class="key op" onclick="insert('/')">÷</button>
-<button class="key" onclick="insert('7')">7</button>
-<button class="key" onclick="insert('8')">8</button>
-<button class="key" onclick="insert('9')">9</button>
-<button class="key op" onclick="insert('*')">×</button>
-<button class="key" onclick="insert('4')">4</button>
-<button class="key" onclick="insert('5')">5</button>
-<button class="key" onclick="insert('6')">6</button>
-<button class="key op" onclick="insert('-')">−</button>
-<button class="key" onclick="insert('1')">1</button>
-<button class="key" onclick="insert('2')">2</button>
-<button class="key" onclick="insert('3')">3</button>
-<button class="key op" onclick="insert('+')">+</button>
-<button class="key" onclick="insert('0')">0</button>
-<button class="key" onclick="insert('.')">.</button>
-<button class="key" onclick="backspace()">⌫</button>
-<button class="key equal" onclick="calculate()">=</button>
-</div>
-</div>
+
 <div class="card">
-<h3>Historik</h3>
-<div id="history"></div>
+  <h3>Historik</h3>
+  <button class="primary" onclick="clearHistory()">Ryd historik</button>
+  <div id="history"></div>
 </div>
 </section>
 
 <section class="page" id="scientific">
-<h1>Videnskabelig beregner</h1>
+<h1>Videnskabelig lommeregner</h1>
 <div class="card">
-<input id="sciInput" placeholder="Eksempel: sqrt(25) + sin(30)">
-<select id="angleMode">
-<option value="deg">Grader</option>
-<option value="rad">Radianer</option>
-</select>
-<button class="primary" onclick="scientificCalc()">Beregn</button>
-<div class="output" id="sciOutput"></div>
+  <p>Eksempler: sqrt(25), sin(30), log(100), 5^2</p>
+  <input id="sciInput" placeholder="Indtast udtryk">
+  <select id="angleMode">
+    <option value="deg">Grader</option>
+    <option value="rad">Radianer</option>
+  </select>
+  <button class="primary" onclick="scientificCalc()">Beregn</button>
+  <div class="output" id="sciOutput"></div>
 </div>
 </section>
 
 <section class="page" id="fractions">
 <h1>Brøkberegner</h1>
 <div class="card">
-<label>Tæller 1</label><input id="fa" type="number" value="1">
-<label>Nævner 1</label><input id="fb" type="number" value="2">
-<label>Tæller 2</label><input id="fc" type="number" value="1">
-<label>Nævner 2</label><input id="fd" type="number" value="3">
-<select id="fop">
-<option value="+">Addition</option>
-<option value="-">Subtraktion</option>
-<option value="*">Multiplikation</option>
-<option value="/">Division</option>
-</select>
-<button class="primary" onclick="fractionCalc()">Beregn</button>
-<div class="output" id="fractionOutput"></div>
+  <label>Tæller 1</label><input id="fa" type="number" value="1">
+  <label>Nævner 1</label><input id="fb" type="number" value="2">
+  <label>Tæller 2</label><input id="fc" type="number" value="1">
+  <label>Nævner 2</label><input id="fd" type="number" value="3">
+  <select id="fop">
+    <option value="+">Addition</option>
+    <option value="-">Subtraktion</option>
+    <option value="*">Multiplikation</option>
+    <option value="/">Division</option>
+  </select>
+  <button class="primary" onclick="fractionCalc()">Beregn</button>
+  <div class="output" id="fractionOutput"></div>
 </div>
 </section>
 
 <section class="page" id="geometry">
 <h1>Geometri</h1>
 <div class="card">
-<select id="shape" onchange="geometryFields()">
-<option value="circle">Cirkel</option>
-<option value="rectangle">Rektangel</option>
-<option value="triangle">Trekant</option>
-<option value="square">Kvadrat</option>
-<option value="sphere">Kugle</option>
-<option value="cube">Terning</option>
-<option value="cylinder">Cylinder</option>
-<option value="cone">Kegle</option>
-</select>
-<div id="geometryInputs"></div>
-<button class="primary" onclick="geometryCalc()">Beregn</button>
-<div class="output" id="geometryOutput"></div>
+  <select id="shape" onchange="geometryFields()">
+    <option value="circle">Cirkel</option>
+    <option value="rectangle">Rektangel</option>
+    <option value="triangle">Trekant</option>
+    <option value="square">Kvadrat</option>
+    <option value="sphere">Kugle</option>
+    <option value="cube">Terning</option>
+    <option value="cylinder">Cylinder</option>
+    <option value="cone">Kegle</option>
+  </select>
+  <div id="geometryInputs"></div>
+  <button class="primary" onclick="geometryCalc()">Beregn</button>
+  <div class="output" id="geometryOutput"></div>
 </div>
 </section>
 
 <section class="page" id="statistics">
 <h1>Statistik</h1>
 <div class="card">
-<textarea id="statInput" placeholder="Indtast tal: 10, 20, 30"></textarea>
-<button class="primary" onclick="statisticsCalc()">Analyser</button>
-<div class="output" id="statOutput"></div>
+  <p>Indtast tal adskilt med komma eller mellemrum.</p>
+  <textarea id="statInput" placeholder="10, 20, 30, 40, 50"></textarea>
+  <button class="primary" onclick="statisticsCalc()">Analyser</button>
+  <div class="output" id="statOutput"></div>
 </div>
 </section>
 
 <section class="page" id="finance">
-<h1>Finans</h1>
+<h1>Finansberegner</h1>
 <div class="card">
-<select id="finType" onchange="financeFields()">
-<option value="compound">Renters rente</option>
-<option value="loan">Lån</option>
-<option value="vat">Moms</option>
-<option value="discount">Rabat</option>
-</select>
-<div id="financeInputs"></div>
-<button class="primary" onclick="financeCalc()">Beregn</button>
-<div class="output" id="financeOutput"></div>
+  <select id="finType" onchange="financeFields()">
+    <option value="compound">Renters rente</option>
+    <option value="loan">Lån</option>
+    <option value="vat">Moms</option>
+    <option value="discount">Rabat</option>
+  </select>
+  <div id="financeInputs"></div>
+  <button class="primary" onclick="financeCalc()">Beregn</button>
+  <div class="output" id="financeOutput"></div>
 </div>
 </section>
 
 <section class="page" id="converter">
 <h1>Enhedsomregner</h1>
 <div class="card">
-<select id="convType" onchange="converterUnits()">
-<option value="length">Længde</option>
-<option value="weight">Vægt</option>
-<option value="temp">Temperatur</option>
-<option value="time">Tid</option>
-<option value="volume">Rumfang</option>
-</select>
-<input id="convValue" type="number" value="1">
-<select id="convFrom"></select>
-<select id="convTo"></select>
-<button class="primary" onclick="convert()">Konverter</button>
-<div class="output" id="convOutput"></div>
+  <select id="convType" onchange="converterUnits()">
+    <option value="length">Længde</option>
+    <option value="weight">Vægt</option>
+    <option value="temp">Temperatur</option>
+    <option value="time">Tid</option>
+    <option value="volume">Rumfang</option>
+  </select>
+  <input id="convValue" type="number" value="1">
+  <select id="convFrom"></select>
+  <select id="convTo"></select>
+  <button class="primary" onclick="convert()">Konverter</button>
+  <div class="output" id="convOutput"></div>
 </div>
 </section>
 
 <section class="page" id="programmer">
 <h1>Programmerberegner</h1>
 <div class="card">
-<input id="progInput" value="255">
-<select id="progBase">
-<option value="10">Decimal</option>
-<option value="2">Binær</option>
-<option value="8">Oktal</option>
-<option value="16">Hexadecimal</option>
-</select>
-<button class="primary" onclick="programmerCalc()">Konverter</button>
-<div class="output" id="progOutput"></div>
+  <p>Konverter mellem talsystemer.</p>
+  <input id="progInput" value="255">
+  <select id="progBase">
+    <option value="10">Decimal</option>
+    <option value="2">Binær</option>
+    <option value="8">Oktal</option>
+    <option value="16">Hexadecimal</option>
+  </select>
+  <button class="primary" onclick="programmerCalc()">Konverter</button>
+  <div class="output" id="progOutput"></div>
 </div>
 </section>
 
 <section class="page" id="equations">
 <h1>Ligningsløser</h1>
 <div class="card">
-<h3>ax + b = c</h3>
-<input id="la" type="number" value="2">
-<input id="lb" type="number" value="4">
-<input id="lc" type="number" value="10">
-<button class="primary" onclick="linearEquation()">Løs</button>
-<div class="output" id="linearOutput"></div>
+  <h3>ax + b = c</h3>
+  <label>a</label><input id="la" type="number" value="2">
+  <label>b</label><input id="lb" type="number" value="4">
+  <label>c</label><input id="lc" type="number" value="10">
+  <button class="primary" onclick="linearEquation()">Løs ligning</button>
+  <div class="output" id="linearOutput"></div>
 </div>
 </section>
+
 </main>
 </div>
-<footer>ULTIMATE CALCULATOR</footer>
-</body>
-</html>
+
+<footer>ULTIMATE CALCULATOR · VERDENS BEDSTE LOMMEREGNER</footer>
+
+<!-- DEL 2 STARTER HER -->
 
 <script>
-const $ = id => document.getElementById(id);
-const fmt = n => Number(n.toPrecision(12)).toLocaleString('da-DK',{maximumFractionDigits:10});
+"use strict";
 
-let expression = '';
-let historyItems = JSON.parse(localStorage.getItem('uc-history') || '[]');
+// HJÆLPEFUNKTIONER
+const $ = id => document.getElementById(id);
+
+function fmt(n) {
+  if (!Number.isFinite(Number(n))) return String(n);
+  return Number(n).toLocaleString('da-DK',{
+    maximumFractionDigits:10
+  });
+}
 
 // NAVIGATION
 document.querySelectorAll('.nav').forEach(button => {
-  button.addEventListener('click', () => {
-    document.querySelectorAll('.nav').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  button.addEventListener('click',()=>{
+    document.querySelectorAll('.nav').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     button.classList.add('active');
     $(button.dataset.page).classList.add('active');
   });
 });
 
 // LOMMEREGNER
+let expression = '';
+let historyItems = [];
+
+try {
+  historyItems = JSON.parse(localStorage.getItem('uc-history') || '[]');
+  if (!Array.isArray(historyItems)) historyItems = [];
+} catch {
+  historyItems = [];
+}
+
 function insert(value) {
   expression += value;
   $('expression').textContent = expression;
@@ -343,36 +391,15 @@ function backspace() {
   $('expression').textContent = expression || 'Klar';
 }
 
-function calculate() {
-  if (!expression.trim()) return;
-  try {
-    const result = evaluate(expression);
-    if (typeof result !== 'number' || !Number.isFinite(result))
-      throw Error('Ugyldigt resultat');
-
-    $('result').textContent = fmt(result);
-
-    historyItems.unshift({
-      expression,
-      result: fmt(result)
-    });
-
-    historyItems = historyItems.slice(0,30);
-    localStorage.setItem('uc-history',JSON.stringify(historyItems));
-    renderHistory();
-  } catch(error) {
-    $('result').textContent = 'Fejl';
-    $('expression').textContent = error.message;
+function evaluate(input,mode='rad') {
+  if (!window.math) {
+    throw Error('Matematikbiblioteket kunne ikke indlæses.');
   }
-}
-
-function evaluate(input, mode='rad') {
-  if (!window.math) throw Error('Matematikbibliotek mangler.');
 
   const angle = mode === 'deg' ? Math.PI/180 : 1;
   const outputAngle = mode === 'deg' ? 180/Math.PI : 1;
 
-  return math.evaluate(input,{
+  const scope = {
     pi:Math.PI,
     e:Math.E,
     sin:x=>Math.sin(x*angle),
@@ -381,18 +408,46 @@ function evaluate(input, mode='rad') {
     asin:x=>Math.asin(x)*outputAngle,
     acos:x=>Math.acos(x)*outputAngle,
     atan:x=>Math.atan(x)*outputAngle
-  });
+  };
+
+  const result = math.evaluate(input,scope);
+
+  if (typeof result !== 'number' || !Number.isFinite(result)) {
+    throw Error('Ugyldigt resultat.');
+  }
+
+  return result;
 }
 
-function renderHistory() {
-  $('history').innerHTML = historyItems.map((item,index)=>`
-    <div class="history-item" onclick="useHistory(${index})">
-      <small>${escapeHTML(item.expression)}</small>
-      <b>${escapeHTML(item.result)}</b>
-    </div>
-  `).join('') || 'Ingen beregninger endnu.';
+function calculate() {
+  if (!expression.trim()) return;
+
+  try {
+    const result = evaluate(expression);
+
+    $('result').textContent = fmt(result);
+
+    historyItems.unshift({
+      expression,
+      result:fmt(result)
+    });
+
+    historyItems = historyItems.slice(0,30);
+
+    localStorage.setItem(
+      'uc-history',
+      JSON.stringify(historyItems)
+    );
+
+    renderHistory();
+
+  } catch(error) {
+    $('result').textContent = 'Fejl';
+    $('expression').textContent = error.message;
+  }
 }
 
+// SIKKER VISNING AF TEKST
 function escapeHTML(value) {
   return String(value).replace(/[&<>"']/g,c=>({
     '&':'&amp;',
@@ -403,68 +458,140 @@ function escapeHTML(value) {
   })[c]);
 }
 
+// HISTORIK
+function renderHistory() {
+  $('history').innerHTML = historyItems.map((item,index)=>`
+    <div class="history-item" onclick="useHistory(${index})">
+      <span>${escapeHTML(item.expression)}</span>
+      <b>${escapeHTML(item.result)}</b>
+    </div>
+  `).join('') || 'Ingen beregninger endnu.';
+}
+
 function useHistory(index) {
+  if (!historyItems[index]) return;
+
   expression = historyItems[index].expression;
+
   $('expression').textContent = expression;
   $('result').textContent = historyItems[index].result;
+}
+
+function clearHistory() {
+  historyItems = [];
+  localStorage.removeItem('uc-history');
+  renderHistory();
 }
 
 renderHistory();
 
 // TASTATUR
 document.addEventListener('keydown',event=>{
-  if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
+  if (['INPUT','TEXTAREA','SELECT'].includes(
+    document.activeElement.tagName
+  )) return;
 
-  if(/^[0-9.+\-*/^()]$/.test(event.key)) insert(event.key);
-  if(event.key==='Enter'||event.key==='=') calculate();
-  if(event.key==='Backspace') backspace();
-  if(event.key==='Escape') clearCalc();
+  if (/^[0-9.+\-*/^()]$/.test(event.key)) {
+    insert(event.key);
+  }
+
+  if (event.key==='Enter' || event.key==='=') {
+    calculate();
+  }
+
+  if (event.key==='Backspace') {
+    backspace();
+  }
+
+  if (event.key==='Escape') {
+    clearCalc();
+  }
 });
 
-// VIDENSKABELIG
+// VIDENSKABELIG LOMMEREGNER
 function scientificCalc() {
   try {
     const result = evaluate(
       $('sciInput').value,
       $('angleMode').value
     );
-    $('sciOutput').textContent = String(result);
+
+    $('sciOutput').textContent = fmt(result);
+
   } catch(error) {
-    $('sciOutput').textContent = 'Fejl: '+error.message;
+    $('sciOutput').textContent =
+      'Fejl: '+error.message;
   }
 }
 
-// BRØKER
+// EKSTRA VIDENSKABELIGE FUNKTIONER
+function scientificExample(value) {
+  $('sciInput').value = value;
+  scientificCalc();
+}
+
+</script>
+
+<!-- DEL 3 STARTER HER -->
+
+<script>
+
+// =====================================
+// BRØKBEREGNER
+// =====================================
+
 function gcd(a,b) {
   a=Math.abs(a);
   b=Math.abs(b);
-  while(b) [a,b]=[b,a%b];
+
+  while(b) {
+    [a,b]=[b,a%b];
+  }
+
   return a||1;
 }
 
 function fractionCalc() {
-  const a=+$('fa').value;
-  const b=+$('fb').value;
-  const c=+$('fc').value;
-  const d=+$('fd').value;
+  const a=Number($('fa').value);
+  const b=Number($('fb').value);
+  const c=Number($('fc').value);
+  const d=Number($('fd').value);
 
-  if(![a,b,c,d].every(Number.isSafeInteger)||b===0||d===0) {
-    $('fractionOutput').textContent='Ugyldig brøk.';
+  if (
+    ![a,b,c,d].every(Number.isSafeInteger) ||
+    b===0 || d===0
+  ) {
+    $('fractionOutput').textContent =
+      'Ugyldig brøk. Kontrollér tallene og nævnerne.';
     return;
   }
 
   let n,den;
 
   switch($('fop').value) {
-    case '+': n=a*d+c*b; den=b*d; break;
-    case '-': n=a*d-c*b; den=b*d; break;
-    case '*': n=a*c; den=b*d; break;
+    case '+':
+      n=a*d+c*b;
+      den=b*d;
+      break;
+
+    case '-':
+      n=a*d-c*b;
+      den=b*d;
+      break;
+
+    case '*':
+      n=a*c;
+      den=b*d;
+      break;
+
     case '/':
       if(c===0) {
-        $('fractionOutput').textContent='Division med nul.';
+        $('fractionOutput').textContent =
+          'Division med nul er ikke tilladt.';
         return;
       }
-      n=a*d; den=b*c;
+      n=a*d;
+      den=b*c;
       break;
   }
 
@@ -474,14 +601,19 @@ function fractionCalc() {
   }
 
   const divisor=gcd(n,den);
+
   n/=divisor;
   den/=divisor;
 
-  $('fractionOutput').textContent=
+  $('fractionOutput').textContent =
     `Resultat: ${n}/${den} = ${fmt(n/den)}`;
 }
 
-// GEOMETRI
+
+// =====================================
+// GEOMETRIBEREGNER
+// =====================================
+
 const shapes = {
   circle:['Radius'],
   rectangle:['Længde','Bredde'],
@@ -494,100 +626,151 @@ const shapes = {
 };
 
 function geometryFields() {
+
   $('geometryInputs').innerHTML =
     shapes[$('shape').value].map((name,index)=>`
       <label>${name}</label>
-      <input type="number" id="geo${index}" min="0" step="any">
+      <input
+        type="number"
+        id="geo${index}"
+        min="0"
+        step="any"
+        placeholder="${name}"
+      >
     `).join('');
 }
 
 function geometryCalc() {
+
   const shape=$('shape').value;
-  const values=shapes[shape].map((_,i)=>+$('geo'+i).value);
+
+  const values=shapes[shape].map(
+    (_,i)=>Number($('geo'+i).value)
+  );
 
   if(values.some(v=>!Number.isFinite(v)||v<=0)) {
-    $('geometryOutput').textContent='Indtast positive tal.';
+    $('geometryOutput').textContent =
+      'Indtast positive tal.';
     return;
   }
 
   const [a,b]=values;
+
   let result='';
 
   switch(shape) {
+
     case 'circle':
-      result=`Areal: ${fmt(Math.PI*a*a)}
-      Omkreds: ${fmt(2*Math.PI*a)}`;
+      result=
+        `Areal: ${fmt(Math.PI*a*a)}
+Omkreds: ${fmt(2*Math.PI*a)}`;
       break;
 
     case 'rectangle':
-      result=`Areal: ${fmt(a*b)}
-      Omkreds: ${fmt(2*(a+b))}`;
+      result=
+        `Areal: ${fmt(a*b)}
+Omkreds: ${fmt(2*(a+b))}`;
       break;
 
     case 'triangle':
-      result=`Areal: ${fmt(a*b/2)}`;
+      result=
+        `Areal: ${fmt(a*b/2)}`;
       break;
 
     case 'square':
-      result=`Areal: ${fmt(a*a)}
-      Omkreds: ${fmt(4*a)}`;
+      result=
+        `Areal: ${fmt(a*a)}
+Omkreds: ${fmt(4*a)}`;
       break;
 
     case 'sphere':
-      result=`Rumfang: ${fmt(4*Math.PI*a**3/3)}
-      Overflade: ${fmt(4*Math.PI*a*a)}`;
+      result=
+        `Rumfang: ${fmt(4*Math.PI*a**3/3)}
+Overflade: ${fmt(4*Math.PI*a*a)}`;
       break;
 
     case 'cube':
-      result=`Rumfang: ${fmt(a**3)}
-      Overflade: ${fmt(6*a*a)}`;
+      result=
+        `Rumfang: ${fmt(a**3)}
+Overflade: ${fmt(6*a*a)}`;
       break;
 
     case 'cylinder':
-      result=`Rumfang: ${fmt(Math.PI*a*a*b)}
-      Overflade: ${fmt(2*Math.PI*a*(a+b))}`;
+      result=
+        `Rumfang: ${fmt(Math.PI*a*a*b)}
+Overflade: ${fmt(2*Math.PI*a*(a+b))}`;
       break;
 
     case 'cone':
-      result=`Rumfang: ${fmt(Math.PI*a*a*b/3)}
-      Overflade: ${fmt(Math.PI*a*(a+Math.hypot(a,b)))}`;
+      result=
+        `Rumfang: ${fmt(Math.PI*a*a*b/3)}
+Overflade: ${fmt(
+          Math.PI*a*(a+Math.hypot(a,b))
+        )}`;
       break;
   }
 
   $('geometryOutput').textContent=result;
 }
 
+// Start med cirkel
 geometryFields();
 
-// STATISTIK
+
+// =====================================
+// STATISTIKBEREGNER
+// =====================================
+
 function statisticsCalc() {
-  const data=$('statInput').value
-    .trim()
-    .split(/[\s,;]+/)
+
+  const raw=$('statInput').value.trim();
+
+  const data=raw.split(/[\s,;]+/)
     .filter(Boolean)
     .map(Number);
 
-  if(!data.length||data.some(n=>!Number.isFinite(n))) {
-    $('statOutput').textContent='Indtast gyldige tal.';
+  if(
+    !data.length ||
+    data.some(n=>!Number.isFinite(n))
+  ) {
+    $('statOutput').textContent =
+      'Indtast gyldige tal.';
     return;
   }
 
   const sorted=[...data].sort((a,b)=>a-b);
+
   const n=data.length;
+
   const mean=data.reduce((a,b)=>a+b,0)/n;
+
   const median=n%2
     ? sorted[(n-1)/2]
     : (sorted[n/2-1]+sorted[n/2])/2;
 
-  const frequencies={};
-  data.forEach(x=>frequencies[x]=(frequencies[x]||0)+1);
+  const frequencies=new Map();
 
-  const maxFrequency=Math.max(...Object.values(frequencies));
-  const modes=Object.keys(frequencies)
-    .filter(x=>frequencies[x]===maxFrequency)
+  data.forEach(x=>{
+    frequencies.set(
+      x,
+      (frequencies.get(x)||0)+1
+    );
+  });
+
+  const maxFrequency=Math.max(
+    ...frequencies.values()
+  );
+
+  const modes=[...frequencies.entries()]
+    .filter(item=>item[1]===maxFrequency)
+    .map(item=>item[0])
     .join(', ');
 
-  const variance=data.reduce((sum,x)=>sum+(x-mean)**2,0)/n;
+  const variance=data.reduce(
+    (sum,x)=>sum+(x-mean)**2,
+    0
+  )/n;
+
   const standardDeviation=Math.sqrt(variance);
 
   $('statOutput').innerHTML=`
@@ -595,182 +778,144 @@ function statisticsCalc() {
     <b>Gennemsnit:</b> ${fmt(mean)}<br>
     <b>Median:</b> ${fmt(median)}<br>
     <b>Typetal:</b> ${escapeHTML(modes)}<br>
-    <b>Minimum:</b> ${sorted[0]}<br>
-    <b>Maksimum:</b> ${sorted[n-1]}<br>
+    <b>Minimum:</b> ${fmt(sorted[0])}<br>
+    <b>Maksimum:</b> ${fmt(sorted[n-1])}<br>
     <b>Varians:</b> ${fmt(variance)}<br>
     <b>Standardafvigelse:</b> ${fmt(standardDeviation)}<br>
     <b>Spændvidde:</b> ${fmt(sorted[n-1]-sorted[0])}
   `;
 }
 
-// FINANS
+
+// =====================================
+// FINANSBEREGNER
+// =====================================
+
 const financeDefinitions = {
-  compound:[['Beløb',10000],['Årlig rente (%)',5],['År',10]],
-  loan:[['Lånebeløb',200000],['Årlig rente (%)',5],['Løbetid (år)',20]],
-  vat:[['Beløb',1000],['Moms (%)',25]],
-  discount:[['Normalpris',1000],['Rabat (%)',20]]
+
+  compound:[
+    ['Beløb',10000],
+    ['Årlig rente (%)',5],
+    ['År',10]
+  ],
+
+  loan:[
+    ['Lånebeløb',200000],
+    ['Årlig rente (%)',5],
+    ['Løbetid (år)',20]
+  ],
+
+  vat:[
+    ['Beløb',1000],
+    ['Moms (%)',25]
+  ],
+
+  discount:[
+    ['Normalpris',1000],
+    ['Rabat (%)',20]
+  ]
+
 };
 
 function financeFields() {
+
   $('financeInputs').innerHTML =
-    financeDefinitions[$('finType').value].map((item,index)=>`
-      <label>${item[0]}</label>
-      <input type="number" id="fin${index}" value="${item[1]}" min="0">
-    `).join('');
+    financeDefinitions[$('finType').value]
+      .map((item,index)=>`
+        <label>${item[0]}</label>
+        <input
+          type="number"
+          id="fin${index}"
+          value="${item[1]}"
+          min="0"
+          step="any"
+        >
+      `).join('');
 }
 
 function financeCalc() {
-  const type=$('finType').value;
-  const a=+$('fin0').value;
-  const r=+$('fin1').value/100;
-  const y=+$('fin2')?.value||0;
 
-  if(!Number.isFinite(a)||!Number.isFinite(r)||a<0||r<0) {
-    $('financeOutput').textContent='Ugyldige værdier.';
+  const type=$('finType').value;
+
+  const a=Number($('fin0').value);
+  const r=Number($('fin1').value)/100;
+
+  const y=
+    type==='vat'||type==='discount'
+      ? 0
+      : Number($('fin2').value);
+
+  if(
+    !Number.isFinite(a) ||
+    !Number.isFinite(r) ||
+    !Number.isFinite(y) ||
+    a<0 || r<0 || y<0
+  ) {
+    $('financeOutput').textContent =
+      'Ugyldige værdier.';
     return;
   }
 
   let result='';
 
+  // RENTERS RENTE
   if(type==='compound') {
+
     const total=a*(1+r)**y;
-    result=`Slutbeløb: ${fmt(total)}
-    Optjent rente: ${fmt(total-a)}`;
+
+    result=
+      `Slutbeløb: ${fmt(total)}
+Optjent rente: ${fmt(total-a)}`;
   }
 
+  // LÅNEBEREGNER
   if(type==='loan') {
+
     if(y<=0) {
+
       result='Løbetiden skal være større end nul.';
+
     } else {
+
       const months=y*12;
       const monthlyRate=r/12;
+
       const payment=monthlyRate===0
         ? a/months
-        : a*monthlyRate/(1-(1+monthlyRate)**(-months));
+        : a*monthlyRate/
+          (1-(1+monthlyRate)**(-months));
 
-      result=`Månedlig ydelse: ${fmt(payment)}
-      Samlet betaling: ${fmt(payment*months)}
-      Renter: ${fmt(payment*months-a)}`;
+      result=
+        `Månedlig ydelse: ${fmt(payment)}
+Samlet betaling: ${fmt(payment*months)}
+Renter: ${fmt(payment*months-a)}`;
     }
   }
 
+  // MOMS
   if(type==='vat') {
-    result=`Pris med moms: ${fmt(a*(1+r))}
-    Momsbeløb: ${fmt(a*r)}`;
+
+    result=
+      `Pris med moms: ${fmt(a*(1+r))}
+Momsbeløb: ${fmt(a*r)}`;
   }
 
+  // RABAT
   if(type==='discount') {
-    result=`Pris efter rabat: ${fmt(a*(1-r))}
-    Besparelse: ${fmt(a*r)}`;
+
+    result=
+      `Pris efter rabat: ${fmt(a*(1-r))}
+Besparelse: ${fmt(a*r)}`;
   }
 
   $('financeOutput').textContent=result;
 }
 
+// Start finansberegner
 financeFields();
 
-// ENHEDSOMREGNER
-const units={
-  length:{m:1,km:1000,cm:.01,mm:.001,ft:.3048,in:.0254,mi:1609.344},
-  weight:{kg:1,g:.001,mg:.000001,lb:.45359237,oz:.0283495},
-  time:{s:1,min:60,h:3600,day:86400,week:604800},
-  volume:{m3:1,l:.001,ml:.000001,gal:.003785411784}
-};
-
-function converterUnits() {
-  const type=$('convType').value;
-  const options=type==='temp'
-    ? ['°C','°F','K']
-    : Object.keys(units[type]);
-
-  $('convFrom').innerHTML=options.map(x=>`<option>${x}</option>`).join('');
-  $('convTo').innerHTML=options.map(x=>`<option>${x}</option>`).join('');
-
-  if(options.length>1) $('convTo').selectedIndex=1;
-}
-
-function convert() {
-  const type=$('convType').value;
-  const value=+$('convValue').value;
-  const from=$('convFrom').value;
-  const to=$('convTo').value;
-
-  if(!Number.isFinite(value)) {
-    $('convOutput').textContent='Ugyldigt tal.';
-    return;
-  }
-
-  let result;
-
-  if(type==='temp') {
-    let c=from==='°C'?value:
-      from==='°F'?(value-32)*5/9:value-273.15;
-
-    result=to==='°C'?c:
-      to==='°F'?c*9/5+32:c+273.15;
-  } else {
-    result=value*units[type][from]/units[type][to];
-  }
-
-  $('convOutput').textContent=
-    `${fmt(value)} ${from} = ${fmt(result)} ${to}`;
-}
-
-converterUnits();
-
-// PROGRAMMERBEREGNER
-function programmerCalc() {
-  const raw=$('progInput').value.trim().replace(/^0x/i,'');
-  const base=+$('progBase').value;
-
-  const patterns={
-    2:/^[01]+$/,
-    8:/^[0-7]+$/,
-    10:/^\d+$/,
-    16:/^[0-9a-f]+$/i
-  };
-
-  if(!patterns[base].test(raw)) {
-    $('progOutput').textContent='Ugyldigt tal.';
-    return;
-  }
-
-  try {
-    let value=0n;
-
-    for(const char of raw.toLowerCase()) {
-      value=value*BigInt(base)+BigInt(parseInt(char,16));
-    }
-
-    $('progOutput').innerHTML=`
-      Decimal: <b>${value.toString(10)}</b><br>
-      Binær: <b>${value.toString(2)}</b><br>
-      Oktal: <b>${value.toString(8)}</b><br>
-      Hexadecimal: <b>${value.toString(16).toUpperCase()}</b>
-    `;
-  } catch(error) {
-    $('progOutput').textContent='Kunne ikke konvertere tallet.';
-  }
-}
-
-// LINEÆR LIGNING
-function linearEquation() {
-  const a=+$('la').value;
-  const b=+$('lb').value;
-  const c=+$('lc').value;
-
-  if(![a,b,c].every(Number.isFinite)) return;
-
-  if(a===0) {
-    $('linearOutput').textContent=
-      b===c?'Uendeligt mange løsninger.':'Ingen løsning.';
-  } else {
-    $('linearOutput').textContent=`x = ${fmt((c-b)/a)}`;
-  }
-}
-
-// START
 </script>
-</body>
-</html>
 
+<!-- DEL 4 STARTER HER -->
+
+  
